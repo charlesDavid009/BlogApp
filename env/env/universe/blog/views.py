@@ -73,12 +73,16 @@ class BlogPostListView(generics.ListAPIView):
     permission_classes       = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        To use search features, always put this before the url
+        in the browser--> ?q=(the word you want to search for)
+        """
         qs = Blog.objects.all()
         query = self.request.GET.get("q")
         if query is not None:
             qs = qs.filter(
-                Q(title_icontains = query)|
-                Q(content_icontains = query)).distinct()
+                Q(title__icontains = query)|
+                Q(content__icontains = query)).distinct()
         return qs
 
 class BlogUsersPostsView(generics.ListAPIView):
@@ -122,37 +126,37 @@ class BlogLikeListView(generics.ListAPIView):
         qs = BlogLikes.objects.filter(blog=blog_id)
         return qs
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def actions(request, *args, **kwargs):
-    """
-    IF ACTION PASSED IS VALID RUN ACTIONS API
-    ID IS REQUIRED
-    ACTIONS = LIKE, UNLIKE, RE_BLOG
-    """
-    if request.method == 'POST':
-        serializer = ActionBlogSerializer(data=request.data)
+class BlogActionView(generics.CreateAPIView):
+
+    queryset = Blog.objects.all()
+    serializer_class = ActionBlogSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs): #- Returns a serializer instance.
+        serializer = ActionBlogSerializer(data = self.request.data)
         if serializer.is_valid():
             data = serializer.validated_data
-            blog_id = data.get("id")
-            action = data.get("action")
-            details = data.get("add")
-            qs = Blog.objects.filter(id=blog_id)
+            blog_id = data.get('id')
+            action = data.get('action')
+            details = data.get('add')
+            queryset = self.get_queryset()
+            qs = queryset.filter(id = blog_id)
             if not qs.exists():
-                return Response({}, status=status.HTTP_404_NOT_FOUND)
+                return Response({}, status=staus.HTTP_404_NOT_FOUND)
             obj = qs.first()
             if action == "like":
-                obj.likes.add(request.user)
+                obj.likes.add(self.request.user)
                 serializer = BlogSerializer(obj)
+                #print(serializer.data)
                 return Response(serializer.data)
             elif action == "unlike":
-                obj.likes.remove(request.user)
-                serializer = BlogSerializer(obj)
-                return Response(serializer.data)
+                    obj.likes.remove(request.user)
+                    serializer = BlogSerializer(obj)
+                    return Response(serializer.data)
             elif action == "report":
-                obj.reports.add(request.user)
-                serializer = BlogSerializer(obj)
-                return Response(serializer.data)
+                    obj.reports.add(request.user)
+                    serializer = BlogSerializer(obj)
+                    return Response(serializer.data)
             elif action == "reblog":
                 new_blog = Blog.objects.create(
                     user=request.user,
@@ -164,5 +168,222 @@ def actions(request, *args, **kwargs):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+#class UserList(generics.ListCreateAPIView):
+    #queryset = User.objects.all()
+    #serializer_class = UserSerializer
+    #permission_classes = [IsAdminUser]
+
+    #def list(self, request):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        #queryset = self.get_queryset()
+        #serializer = UserSerializer(queryset, many=True)
+        #return Response(serializer.data)
+
+
+#get_serializer_context(self) - Returns a dictionary containing any extra context that should be supplied to the serializer. Defaults to including 'request', 'view' and 'format' keys.
+#get_serializer(self, instance=None, data=None, many=False, partial=False) - Returns a serializer instance.
+
+
+#class MultipleFieldLookupMixin:
+    """
+    Apply this mixin to any view or viewset to get multiple field filtering
+    based on a `lookup_fields` attribute, instead of the default single field filtering.
+    """
+
+    #def get_object(self):
+        #queryset = self.get_queryset()             # Get the base queryset
+        #queryset = self.filter_queryset(queryset)  # Apply any filter backends
+        #filter = {}
+        ##    if self.kwargs[field]:  # Ignore empty fields.
+        #        filter[field] = self.kwargs[field]
+        #obj = get_object_or_404(queryset, **filter)  # Lookup the object
+        #self.check_object_permissions(self.request, obj)
+        #return obj
+
 # ALL ABOUT COMMENTS POSTS
 
+
+class CommentPostRUDView(generics.RetrieveDestroyAPIView):
+    """
+    Get A Comment Details According To The Id
+    """
+    lookup = 'pk'
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return Comment.objects.all()
+
+
+class CommentCreatePostView(generics.CreateAPIView):
+    """
+    Create A Comment
+    """
+    lookup = 'pk'
+    serializer_class = CreateCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Comment.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CommentPostListView(generics.ListAPIView):
+    """
+    Get All Comment Realated To A Blog
+    """
+    lookup = 'pk'
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        To use search features, always put this before the url
+        in the browser--> ?q=(the word you want to search for)
+        """
+        blog_id = self.kwargs.get('pk')
+        qs = Comment.objects.filter(blog = blog_id)
+        return qs
+
+class CommentLikeListView(generics.ListAPIView):
+    """
+    Displays Only Comment Likes user
+    """
+    lookup = 'id'
+    serializer_class = CommentLikesSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        blog_id = self.kwargs.get('id')
+        qs = CommentLikes.objects.filter(blog=blog_id)
+        return qs
+
+
+class CommentActionView(generics.CreateAPIView):
+    """
+    Actions Like Or Unlike on Comment
+    """
+    queryset = Comment.objects.all()
+    serializer_class = ActionBlogSerializer
+    permission_classes = [IsAuthenticated]
+
+    # - Returns a serializer instance.
+    def create(self, request, *args, **kwargs):
+        serializer = ActionBlogSerializer(data=self.request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            comment_id = data.get('id')
+            action = data.get('action')
+            queryset = self.get_queryset()
+            qs = queryset.filter(id=comment_id)
+            if not qs.exists():
+                return Response({}, status=staus.HTTP_404_NOT_FOUND)
+            obj = qs.first()
+            if action == "like":
+                obj.like.add(self.request.user)
+                serializer = CommentSerializer(obj)
+                #print(serializer.data)
+                return Response(serializer.data)
+            elif action == "unlike":
+                    obj.like.remove(request.user)
+                    serializer = CommentSerializer(obj)
+                    return Response(serializer.data)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ALL ABOUT SubCOMMENTS POSTS
+
+
+class SubCommentPostRUDView(generics.RetrieveDestroyAPIView):
+    """
+    Get A SubComment Deatils With Its Id 
+    """
+    lookup = 'pk'
+    serializer_class = SubCommentSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return SubComment.objects.all()
+
+
+class SubCommentCreatePostView(generics.CreateAPIView):
+    """
+    Create A SubComment
+    """
+    lookup = 'pk'
+    serializer_class = CreateSubCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SubComment.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class SubCommentPostListView(generics.ListAPIView):
+    """
+    Get All SubComment Related To Comment Id   
+    """
+    lookup = 'pk'
+    serializer_class = SubCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        To use search features, always put this before the url
+        in the browser--> ?q=(the word you want to search for)
+        """
+        blog_id = self.kwargs.get('pk')
+        qs = SubComment.objects.filter(blog=blog_id)
+        return qs
+
+
+class SubCommentLikeListView(generics.ListAPIView):
+    """
+    Displays Only Users Likes
+    """
+    lookup = 'id'
+    serializer_class = SubCommentLikesSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        blog_id = self.kwargs.get('id')
+        qs = SubCommentLikes.objects.filter(blog=blog_id)
+        return qs
+
+
+class SubCommentActionView(generics.CreateAPIView):
+    """
+    Actions Like Or Unlike On SubComment
+    """
+    queryset = SubComment.objects.all()
+    serializer_class = ActionBlogSerializer
+    permission_classes = [IsAuthenticated]
+
+    # - Returns a serializer instance.
+    def create(self, request, *args, **kwargs):
+        serializer = ActionBlogSerializer(data=self.request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            comment_id = data.get('id')
+            action = data.get('action')
+            queryset = self.get_queryset()
+            qs = queryset.filter(id=comment_id)
+            if not qs.exists():
+                return Response({}, status=staus.HTTP_404_NOT_FOUND)
+            obj = qs.first()
+            if action == "like":
+                obj.like.add(self.request.user)
+                serializer = SubCommentSerializer(obj)
+                #print(serializer.data)
+                return Response(serializer.data)
+            elif action == "unlike":
+                    obj.like.remove(request.user)
+                    serializer = SubCommentSerializer(obj)
+                    return Response(serializer.data)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
