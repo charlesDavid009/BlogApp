@@ -111,11 +111,9 @@ class Message(models.Model):
     reference = models.ForeignKey(MyBlog, on_delete=models.CASCADE)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField()
-    like = models.ManyToManyField(
-        USER, related_name='blog_message', blank=True, through="MessageLikes")
+    like = models.ManyToManyField(USER, related_name='blog_message', blank=True, through="MessageLikes")
     created_at = models.DateTimeField(auto_now_add=True)
-    comments = models.ManyToManyField(
-        USER, related_name='Message_owner', blank=True, through="MyComment")
+    comments = models.ManyToManyField(USER, related_name='Message_owner', blank=True, through="MyComment")
 
     class Meta:
         ordering = ["-created_at"]
@@ -139,8 +137,7 @@ class MyComment(models.Model):
     reference = models.ForeignKey(Message, on_delete=models.CASCADE)
     owners = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
-    like = models.ManyToManyField(
-        USER, related_name='message_owner', blank=True, through="CommentsLikes")
+    like = models.ManyToManyField(USER, related_name='message_owner', blank=True, through="CommentsLikes")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

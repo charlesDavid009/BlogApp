@@ -124,7 +124,6 @@ class ActionBlogSerializer(serializers.Serializer):
     action = serializers.CharField()
     title = serializers.CharField(required=False)
     add = serializers.CharField(required=False)
-    user = serializers.IntegerField(required=False)
 
     def validate_action(self, value):
         value = value.lower().strip()
@@ -188,14 +187,20 @@ class MyBlogLikesSerializer(serializers.ModelSerializer):
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    report = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = MyBlog
-        fields = ['title', 'content', 'picture', 'owner', 'report']
+        fields = '__all__'
 
     def get_report(self, obj):
         return obj.report.count()
+
+    def get_likes(self, obj):
+        return obj.likes.count()
+
+    def get_comment(self, obj):
+        return obj.comment.count()
+
 
 
 class ReportListSerializer(serializers.ModelSerializer):

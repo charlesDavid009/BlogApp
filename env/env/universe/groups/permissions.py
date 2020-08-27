@@ -30,8 +30,18 @@ class IsFollower(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        not_follower= Group.objects.filter(follower = user).exists()
-        return not_follower
+        is_follower= Group.objects.filter(follower = user).exists()
+        return is_follower
+
+class IsUsers(permissions.BasePermission):
+    """
+    This permissions only allows users to view
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+        is_user= Group.objects.filter(users = user).exists()
+        return is_user
 
 
 class MyAdmin(permissions.BasePermission):
@@ -41,6 +51,6 @@ class MyAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        not_admin = Group.objects.filter(admin=user).exists()
-        return  not_admin
+        is_admin = Group.objects.filter(admin=user).exists()
+        return  is_admin
 
