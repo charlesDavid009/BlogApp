@@ -100,6 +100,7 @@ class MyBlogLikes(models.Model):
 class Reports(models.Model):
     users = models.ForeignKey(USER, on_delete=models.CASCADE)
     blog = models.ForeignKey(MyBlog, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property

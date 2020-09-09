@@ -61,7 +61,7 @@ class CreateBlogSerializer(serializers.Serializer):
         return MyBlog.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        instance.titletitle = validated_data.get('title', instance.title)
+        instance.title = validated_data.get('title', instance.title)
         instance.picture = validated_data.get('picture', instance.picture)
         instance.content = validated_data.get('content', instance.content)
         instance.save()

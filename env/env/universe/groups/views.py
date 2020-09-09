@@ -288,6 +288,43 @@ class GroupOwnerActionView(generics.CreateAPIView):
                 return Response(serializer.data)
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
+class FollowersListView(generics.ListAPIView):
+    """
+    Displays All Users that Follows This Group
+    """
+    lookup                      ='pk'
+    serializer_class            = FollowsSerializer
+    permission_classes          = [IsFollower, IsUsers, IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.kwargs.get('pk')
+        qs = Follows.objects.filter(group= group_id)
+        return qs
+class UsersListView(generics.ListAPIView):
+    """
+    Displays All Users that Uses This Group
+    """
+    lookup = 'pk'
+    serializer_class = UsesSerializer
+    permission_classes = [IsFollower, IsUsers, IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.kwargs.get('pk')
+        qs = Uses.objects.filter(members=group_id)
+        return qs
+class AdminListView(generics.ListAPIView):
+    """
+    Displays All Users that Admin This Group
+    """
+    lookup                      ='pk'
+    serializer_class            = AdminSerializer
+    permission_classes          = [IsFollower, IsUsers, IsAuthenticated]
+
+    def get_queryset(self):
+        group_id = self.kwargs.get('pk')
+        qs = Admins.objects.filter(container= group_id)
+        return qs
+
 # BLOG BRGINS AND END HERE
 
 class BlogPostRUDView(generics.RetrieveDestroyAPIView):
@@ -344,14 +381,12 @@ class BlogReportsPostsView(generics.ListAPIView):
     Displays Reports
     """
     lookup                  = 'pk'
-    serializer_class        = ReportSerializer
+    serializer_class        = BlogSerializer
     permission_classes      = [IsAuthenticated, MyAdmin]
 
     def get_queryset(self):
-        group_id = self.kwargs.get('pk')
-        qs = Reports.objects.all()
-        qs = BlogSerializer(qs, many=True)
-        print(qs)
+        _ids= self.kwargs.get('pk')
+        qs = Reports.objects.filter(group = _ids)
         return qs
 
 class BlogReportUseraView(generics.ListAPIView):
@@ -363,8 +398,8 @@ class BlogReportUseraView(generics.ListAPIView):
     permission_classes      = [IsAuthenticated, MyAdmin]
 
     def get_queryset(self):
-        group_id = self.kwargs.get('pk')
-        qs = Reports.objects.filter(blog = group_id)
+        _ids = self.kwargs.get('pk')
+        qs = Reports.objects.filter(blog =_ids)
         return qs
 
 class BlogLikeListView(generics.ListAPIView):
@@ -412,6 +447,10 @@ class BlogActionView(generics.CreateAPIView):
                     return Response(serializer.data)
             elif action == "report":
                 obj.report.add(request.user)
+                vs = obj.reference_id
+                qs = Reports.objects.filter(id=obj.id)
+                qs = qs.first()
+                qs = qs.save(group= vs)
                 serializer = BlogSerializer(obj)
                 return Response(serializer.data)
             elif action == "reblog":

@@ -13,6 +13,9 @@ urlpatterns = [
     path('Group/action', views.GroupActionView.as_view()),
     path('Group/admins_action', views.GroupAdminActionView.as_view()),
     path('Group/owner_action', views.GroupOwnerActionView.as_view()),
+    path('Group/<int:pk>/followerslist', views.FollowersListView.as_view()),
+    path('Group/<int:pk>/userlist', views.UsersListView.as_view()),
+    path('Group/<int:pk>/adminlist', views.AdminListView.as_view()),
 
     # Blog Urls
     path('MyBlog/create', views.BlogCreatePostView.as_view()),

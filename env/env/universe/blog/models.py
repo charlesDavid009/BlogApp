@@ -34,11 +34,10 @@ class Blog(models.Model):
     """
     API FOR USER TO CREATE THEIR OWN BLOG POST
     """
-    parent = models.ForeignKey(
-        'self', null=True, blank=True, on_delete=models.SET_NULL)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=200, blank=False, null=True)
     content = models.CharField(max_length=8000, blank=False, null=True)
-    #picture = models.ImageField(blank=True, null=True)
+    picture = models.ImageField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comments = models.ManyToManyField(User, related_name='Blog_comments', blank=True, through='Comment')
     likes = models.ManyToManyField(User, related_name='Blog_likes', blank=True, through='BlogLikes')

@@ -9,7 +9,8 @@ from .models import (
     CommentsLikes,
     Message,
     MessageLikes,
-    Admins
+    Admins,
+    Reports
 )
 
 # Register your models here.
@@ -32,7 +33,6 @@ class MessageAdmin(admin.ModelAdmin):
 class CommentsLikesAdmin(admin.TabularInline):
     model = CommentsLikes
 
-
 class CommentAdmin(admin.ModelAdmin):
     inlines = [CommentsLikesAdmin]
     list_display = ['reference', 'owners']
@@ -41,6 +41,13 @@ class CommentAdmin(admin.ModelAdmin):
 
     class Meta:
         model = MyComment
+
+
+class ReportsAdmin(admin.ModelAdmin):
+    list_display = ['group', 'blog', 'users', 'created_at']
+    search_field = ['group', 'blog']
+    class Meta:
+        model = Reports
 
 
 class BlogLikesAdmin(admin.TabularInline):
@@ -83,3 +90,4 @@ admin.site.register(Group, GroupAdmin)
 admin.site.register(MyBlog, BlogAdmin)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(MyComment, CommentAdmin)
+admin.site.register(Reports, ReportsAdmin)
