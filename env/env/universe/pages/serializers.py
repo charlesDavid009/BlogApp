@@ -5,10 +5,11 @@ from .models import (
     Liking,
     Blogs,
     BlogLiked,
-    Comment,
-    CommentLikes
+    Comments,
+    CommentLiked
     )
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 User = get_user_model()
 
@@ -20,18 +21,15 @@ class PageSerializer(serializers.ModelSerializer):
         feilds = '__all__'
 
     def get_following(self, obj):
-        return obj.following.count()
+        return obj.followed.count()
 
     def get_likes(self, obj):
         return obj.likes.count()
 
-    def get_comments(self, obj):
-        return obj.comments.count()
-
 class CreatePageSerializer(serializers.Serializer):
-    id = serializers.InterField(read_only = True)
+    id = serializers.IntegerField(read_only = True)
     name = serializers.CharField()
-    descriptions = serializers.TextField()
+    descriptions = serializers.CharField()
     photo = serializers.ImageField(required = False)
     created = serializers.DateTimeField(read_only = True)
     updated = serializers.DateTimeField(read_only = True)
@@ -83,14 +81,11 @@ class BlogSerializer(serializers.ModelSerializer):
         model = Blogs
         fields = "__all__"
 
-    def get_reports(self, obj):
-        return obj.reports.count()
-
     def get_likes(self, obj):
         return obj.likes.count()
 
     def get_comments(self, obj):
-        return obj.comments.count()
+        return obj.commented.count()
 
     def get_content(self, obj):
         content = obj.content
@@ -99,7 +94,7 @@ class BlogSerializer(serializers.ModelSerializer):
             return content
 
 
-class BlogLikesSerializer(serializers.ModelSerializer):
+class BlogLikedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BlogLiked
@@ -113,7 +108,7 @@ class CreateCommentSerializer(serializers.Serializer):
     created = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        return Comment.objects.create(**validated_data)
+        return Comments.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.blog_id = validated_data.get('blog_id', instance.blog_id)
@@ -127,24 +122,20 @@ class CommentSerializer(serializers.ModelSerializer):
     comment = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Comment
+        model = Comments
         fields = '__all__'
 
     def get_like(self, obj):
         return obj.like.count()
 
-    def get_comment(self, obj):
-        return obj.comment.count()
-
-
 class CommentLikesSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CommentLikes
+        model = CommentLiked
         fields = '__all__'
 
 
-class ActionBlogSerializer(serializers.Serializer):
+class ActionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     action = serializers.CharField()
     add = serializers.CharField(required=False, allow_blank=True)

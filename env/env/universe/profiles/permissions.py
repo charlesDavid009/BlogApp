@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .models import Profiles
+from .models import Profile
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -19,5 +19,5 @@ class IsOwners(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        not_owner = Group.objects.filter(user= user)
+        not_owner = Profile.objects.filter(user= user)
         return not not_owner

@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 3RD PARTY APPS
     'rest_framework',
-    'pillow',
     
     # Installed APPs
     'accounts',

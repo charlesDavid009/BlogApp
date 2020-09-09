@@ -9,10 +9,11 @@ USER = get_user_model()
 
 class ProfileQuerySet(models.QuerySet):
     def following_feed(self, users):
-        profiles_exist = users.following.exists()
+        user = Profile.objects.filter(user = users)
+        profiles_exist = user.following.exists()
         followed_users = []
         if profiles_exist:
-            followed_users = users.following.values_list(
+            followed_users = user.following.values_list(
                 "users__id", flat=True)
         return self.filter(users__id__in=followed_users).distinct().order_by("-created_at")
 

@@ -7,17 +7,17 @@ User = get_user_model()
 # Create your models here.
 
 class Page(models.Model):
-    user = models.ForeignKey(User,  on_delete=models.CASCADE)
+    users = models.ForeignKey(User,  on_delete=models.CASCADE)
     name = models.CharField(max_length = 400, blank = False, null = True)
     description = models.TextField(blank = True, null = True)
     created = models.DateTimeField(auto_now_add = True)
     updated = models.DateTimeField(auto_now=True)
     photo = models. ImageField(blank= True, null = True)
-    following = models.ManyToManyField(User, related_name = "followings", blank = True, null = True)
-    likes = models.ManyToManyField(User, related_name = "liking", blank= True, null = True)
+    followed = models.ManyToManyField(User, related_name = "followered", blank = True, through= 'Following')
+    likes = models.ManyToManyField(User, related_name = "liked", blank= True, through = 'Liking')
 
 class Following(models.Model):
-    users = models.ForeignKey(User, on_delete=models.CASCADE)
+    users = models.ForeignKey(User, related_name ='users_id', on_delete=models.CASCADE)
     references = models.ForeignKey(Page,  on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add = True)
 
@@ -32,12 +32,12 @@ class Blogs(models.Model):
     """
     reference = models.ForeignKey(Page, on_delete= models.CASCADE)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
-    title = models.CharField(max_length=200, blank=False, null=True)
+    title = models.CharField(max_length=200, blank=True, null=True)
     content = models.CharField(max_length=8000, blank=False, null=True)
     picture = models.ImageField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    comments = models.ManyToManyField(User, related_name='Blog_comments', blank=True, through='Comment')
-    likes = models.ManyToManyField(User, related_name='Blog_likes', blank=True, through='BlogLikes')
+    commented = models.ManyToManyField(User, related_name='page_comments', blank=True, through='Comments')
+    likes = models.ManyToManyField(User, related_name='pasge_likes', blank=True, through='BlogLiked')
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -56,7 +56,7 @@ class BlogLiked(models.Model):
     """
     GETS THE TIME LIKES HAPPENED 
     """
-    blog = models.ForeignKey(Blogs, on_delete=models.CASCADE)
+    blogs = models.ForeignKey(Blogs, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -65,15 +65,14 @@ class BlogLiked(models.Model):
         return self.user
 
 
-class Comment(models.Model):
+class Comments(models.Model):
     """
     MODELS FOR COMMENTS 
     """
     blog = models.ForeignKey(Blogs, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
-    like = models.ManyToManyField(User, blank=True, related_name='Commnets_likes', through="CommentLikes")
-    comment = models.ManyToManyField(User, blank=True,  related_name='Commnets_count', through="SubComment")
+    like = models.ManyToManyField(User, blank=True, related_name='Comments_likes', through="CommentLiked")
     created = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -81,11 +80,11 @@ class Comment(models.Model):
         return self.user
 
 
-class CommentLikes(models.Model):
+class CommentLiked(models.Model):
     """
     GETS THE TIME LIKES HAPPENED
     """
-    blog = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    blog = models.ForeignKey(Comments, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
 

@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import (
     Blogs,
     BlogLiked,
-    Comment,
-    CommentLikes,
+    Comments,
+    CommentLiked,
     Page,
     Following,
     Liking
@@ -21,7 +21,7 @@ class PageLikesAdmin(admin.TabularInline):
 
 class PageAdmin(admin.ModelAdmin):
     inlines = [PageFollowAdmin, PageLikesAdmin]
-    list_display = ['name', 'user', 'created',  'user_info']
+    list_display = ['name', 'users', 'created']
 
     search_feild = ['name']
 
@@ -30,7 +30,7 @@ class PageAdmin(admin.ModelAdmin):
 
 
 class CommentLikesAdmin(admin.TabularInline):
-    model = CommentLikes
+    model = CommentLiked
 
 
 class CommentAdmin(admin.ModelAdmin):
@@ -40,7 +40,7 @@ class CommentAdmin(admin.ModelAdmin):
     search_feild = ['blog']
 
     class Meta:
-        model = Comment
+        model = Comments
 
 
 class BlogLikesAdmin(admin.TabularInline):
@@ -57,5 +57,5 @@ class BlogAdmin(admin.ModelAdmin):
         model = Blogs
 
 admin.site.register(Blogs, BlogAdmin)
-admin.site.register(Comment, CommentAdmin)
+admin.site.register(Comments, CommentAdmin)
 admin.site.register(Page, PageAdmin)
