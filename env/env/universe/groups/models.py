@@ -37,7 +37,6 @@ class Follows(models.Model):
     def user_info(self):
         return self.user
 
-
 class Uses(models.Model):
     user = models.ForeignKey(USER, on_delete=models.CASCADE)
     members = models.ForeignKey(Group, on_delete=models.CASCADE)

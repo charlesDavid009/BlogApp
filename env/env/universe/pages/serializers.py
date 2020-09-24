@@ -18,7 +18,7 @@ ACTIONS = settings.ACTIONS
 class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        feilds = '__all__'
+        fields = '__all__'
 
     def get_following(self, obj):
         return obj.followed.count()
@@ -29,7 +29,7 @@ class PageSerializer(serializers.ModelSerializer):
 class CreatePageSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only = True)
     name = serializers.CharField()
-    descriptions = serializers.CharField()
+    description = serializers.CharField()
     photo = serializers.ImageField(required = False)
     created = serializers.DateTimeField(read_only = True)
     updated = serializers.DateTimeField(read_only = True)
@@ -55,7 +55,7 @@ class LikingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CreateBlogSerializer(serializers.Serializer):
-    reference_id = serializers.IntegerField(read_only=True)
+    reference_id = serializers.IntegerField(required = True)
     title = serializers.CharField()
     content = serializers.CharField()
     picture = serializers.ImageField(required=False)
@@ -72,7 +72,6 @@ class CreateBlogSerializer(serializers.Serializer):
 
 
 class BlogSerializer(serializers.ModelSerializer):
-    reports = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
     comments = serializers.SerializerMethodField(read_only=True)
     parent = CreateBlogSerializer(read_only=True)
@@ -119,7 +118,6 @@ class CreateCommentSerializer(serializers.Serializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     like = serializers.SerializerMethodField(read_only=True)
-    comment = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comments

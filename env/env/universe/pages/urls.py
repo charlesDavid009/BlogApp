@@ -15,13 +15,13 @@ urlpatterns = [
     path('Blogs/create', views.BlogCreatePostView.as_view()),
     path('Blogs/<int:pk>/detail', views.BlogPostRUDView.as_view()),
     path('Blogs/<int:id>/likes', views.BlogLikeListView.as_view()),
-    path('Blogs/', views.BlogPostListView.as_view()),
+    path('Blogs/<int:pk>/', views.BlogPostListView.as_view()),
     path('Blogs/action', views.BlogActionView.as_view()),
 
     #Comment Urls
-    path('Comment/create', views.CommentCreatePostView.as_view()),
-    path('Comment/<int:pk>/detail', views.CommentPostRUDView.as_view()),
-    path('Comment/<int:id>/likes', views.CommentLikeListView.as_view()),
-    path('Comment/<int:pk>/', views.CommentPostListView.as_view()),
-    path('Comment/action', views.CommentActionView.as_view()),
+    path('Comments/create', views.CommentCreatePostView.as_view()),
+    path('Comments/<int:pk>/detail', views.CommentPostRUDView.as_view()),
+    path('Comments/<int:id>/likes', views.CommentLikeListView.as_view()),
+    path('Comments/<int:pk>/', views.CommentPostListView.as_view()),
+    path('Comments/action', views.CommentActionView.as_view()),
 ]

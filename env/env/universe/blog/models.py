@@ -12,10 +12,10 @@ USER = get_user_model()
 class BlogQuerySet(models.QuerySet):
     def feed(self, user):
 
-        profiles_exist = user.following.exists()
+        profiles_exist = user.my_followings.exists()
         followed_users = []
         if profiles_exist:
-            followed_users = user.following.values_list("user__id", flat=True)
+            followed_users = user.my_followings.values_list("user__id", flat=True)
         return self.filter(
             Q(user__id__in=followed_users) |
             Q(user=user)

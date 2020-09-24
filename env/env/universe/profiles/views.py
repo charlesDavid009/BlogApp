@@ -13,6 +13,7 @@ from django.conf import settings
 from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import render
 from rest_framework import status
+from django.db.models import Q
 from rest_framework.response import Response
 
 ACTIONS = settings.ACTIONS
@@ -40,6 +41,9 @@ class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class            = ProfileSerializer
     permission_classes          = [IsAuthenticated, IsOwnerOrReadOnly]
 
+    def get_queryset(self):
+        return Profile.objects.all()
+
 class MyProfileView(generics.ListAPIView):
     """
     Gets Users Profile
@@ -62,9 +66,14 @@ class GetUserView(generics.ListAPIView):
     permission_classes          = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.kwargs.get('slug')
-        qs = Profile.objects.filter(user = user)
+        query = self.request.GET.get("q")
+        if query is not None:
+            qs = Profile.objects.all()
+            qs = qs.filter(
+                Q(user__username__icontains = query)|
+                Q(first_name__icontains = query)).distinct()
         return qs
+
 
 class UserFollowersView(generics.ListAPIView):
     """
@@ -115,7 +124,7 @@ class ProfileActionView(generics.CreateAPIView):
             obj = qs.first()
             if me == obj.user:
                 vs = obj.user
-                qs = vs.following.all()
+                qs = vs.my_followings.all()
                 serializer = FollowSerializer(qs)
                 return Response(serializer.data)
             action = data.get("action")

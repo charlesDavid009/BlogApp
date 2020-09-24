@@ -124,6 +124,7 @@ class ActionBlogSerializer(serializers.Serializer):
     action = serializers.CharField()
     title = serializers.CharField(required=False)
     add = serializers.CharField(required=False)
+    group_id = serializers.IntegerField(required = False)
 
     def validate_action(self, value):
         value = value.lower().strip()

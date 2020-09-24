@@ -102,7 +102,7 @@ class BlogUsersPostsView(generics.ListAPIView):
 
 class BlogFeedsView(generics.ListAPIView):
     """
-    Displays Only Users Posts
+    Displays Only Users Posts and users he follows
     """
     serializer_class         = BlogSerializer
     permission_classes       = [IsAuthenticated]

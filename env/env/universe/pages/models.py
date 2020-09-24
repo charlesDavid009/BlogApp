@@ -17,7 +17,7 @@ class Page(models.Model):
     likes = models.ManyToManyField(User, related_name = "liked", blank= True, through = 'Liking')
 
 class Following(models.Model):
-    users = models.ForeignKey(User, related_name ='users_id', on_delete=models.CASCADE)
+    users = models.ForeignKey(User, on_delete=models.CASCADE)
     references = models.ForeignKey(Page,  on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add = True)
 

@@ -431,6 +431,11 @@ class BlogActionView(generics.CreateAPIView):
             action = data.get('action')
             til = data.get('title')
             add = data.get('add')
+            group = data.get('group_id')
+            vs = Group.objects.filter(id = group)
+            if not vs.exists():
+                return Response({}, status = status.HTTP_404_NOT_FOUND)
+            vd = vs.first()
             queryset = self.get_queryset()
             qs = queryset.filter(id = blog_id)
             if not qs.exists():

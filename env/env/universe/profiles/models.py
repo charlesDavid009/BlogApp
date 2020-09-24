@@ -42,7 +42,7 @@ class Profile(models.Model):
     nationality = models.CharField(max_length=250, blank=False, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
-    followers = models.ManyToManyField(USER, related_name='following', blank=True, through="Follow")
+    followers = models.ManyToManyField(USER, related_name='my_followings', blank=True, through="Follow")
 
     objects = ProfileManager()
 

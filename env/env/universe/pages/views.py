@@ -26,6 +26,9 @@ from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrReadOnly, IsOwner
 from django.conf import settings
+from django.shortcuts import render
+from rest_framework import status
+from rest_framework.response import Response
 
 Action = settings.ACTIONS
 
@@ -42,8 +45,8 @@ class CreatePageView(generics.CreateAPIView):
         serializer.save(users = self.request.user)
 
 class PageListView(generics.ListAPIView):
-    serializers = PageSerializer
-    permisssions_classes = [IsAuthenticated]
+    serializer_class        = PageSerializer
+    permisssions_classes    = [IsAuthenticated]
 
     def get_queryset(self):
         return Page.objects.all()
@@ -61,9 +64,11 @@ class FollowView(generics.ListAPIView):
     serializer_class            = FollowingSerializer
     permissions_classes         = [IsAuthenticated]
 
-    def objects(self, request, *args, **kwargs):
+    def get_queryset(self):
         page_id = self.kwargs.get('pk')
         qs = Following.objects.filter(references = page_id)
+        obj = qs.first()
+        return obj
 
 class LikeListView(generics.ListAPIView):
     lookup                      ='pk'
@@ -91,7 +96,7 @@ class PageActionView(generics.CreateAPIView):
             queryset = self.get_queryset()
             qs = queryset.filter(id=blog_id)
             if not qs.exists():
-                return Response({}, status=staus.HTTP_404_NOT_FOUND)
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
             obj = qs.first()
             if action == "like":
                 obj.likes.add(self.request.user)
@@ -131,7 +136,7 @@ class BlogCreatePostView(generics.CreateAPIView):
         return Blogs.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user =self.request.user)
 
 
 class BlogPostListView(generics.ListAPIView):
@@ -147,7 +152,8 @@ class BlogPostListView(generics.ListAPIView):
         To use search features, always put this before the url
         in the browser--> ?q=(the word you want to search for)
         """
-        qs = Blogs.objects.all()
+        id_ = self.kwargs.get('pk')
+        qs = Blogs.objects.filter(reference = id_)
         query = self.request.GET.get("q")
         if query is not None:
             qs = qs.filter(
