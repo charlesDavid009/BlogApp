@@ -24,14 +24,13 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        exclude = ['request', 'admin']
+        exclude = [ 'request','admin']
 
     def get_follower(self, obj):
         return obj.follower.count()
 
     def get_users(self, obj):
         return obj.users.count()
-
 
 class CreateGroupSerializer(serializers.Serializer):
     group_name = serializers.CharField(max_length=100)
@@ -132,6 +131,16 @@ class ActionBlogSerializer(serializers.Serializer):
             return value
         return serializers.ValidationError(status=400)
 
+class ActionReportSerializer(serializers.Serializer):
+    id_ = serializers.IntegerField()
+    action = serializers.CharField()
+    group_id = serializers.IntegerField(required = False)
+
+    def validate_action(self, value):
+        value = value.lower().strip()
+        if value in ACTIONS:
+            return value
+        return serializers.ValidationError(status=400)
 
 class CommentSerializer(serializers.ModelSerializer):
     like = serializers.SerializerMethodField(read_only=True)

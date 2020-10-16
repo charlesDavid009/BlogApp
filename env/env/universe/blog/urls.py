@@ -1,7 +1,6 @@
 from django.urls import path, include
 from blog import views
 
-
 urlpatterns = [
     path('Blog/create', views.BlogCreatePostView.as_view()),
     path('Blog/<int:pk>/detail', views.BlogPostRUDView.as_view()),
@@ -26,4 +25,5 @@ urlpatterns = [
     path('SubComment/<int:id>/likes', views.SubCommentLikeListView.as_view()),
     path('SubComment/<int:pk>/', views.SubCommentPostListView.as_view()),
     path('SubComment/action', views.SubCommentActionView.as_view()),
+
 ]

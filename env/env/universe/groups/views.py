@@ -12,6 +12,7 @@ from .serializers import (
     MessageSerializer,
     CreateMessageSerializer,
     ActionBlogSerializer,
+    ActionReportSerializer,
     CommentSerializer,
     CreateCommentSerializer,
     RequestSerializer,
@@ -298,7 +299,7 @@ class FollowersListView(generics.ListAPIView):
 
     def get_queryset(self):
         group_id = self.kwargs.get('pk')
-        qs = Follows.objects.filter(group= group_id)
+        qs = Follows.objects.filter(groups= group_id)
         return qs
 class UsersListView(generics.ListAPIView):
     """
@@ -414,6 +415,36 @@ class BlogLikeListView(generics.ListAPIView):
         blog_id = self.kwargs.get('id')
         qs = MyBlogLikes.objects.filter(blog=blog_id)
         return qs
+
+class BlogActionView(generics.CreateAPIView):
+    """
+    API FOR ACTIONS LIKE, UNLIKE , REBLOG, REPORT ON BLOGS
+    """
+    queryset = MyBlog.objects.all()
+    serializer_class = ActionReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs): #- Returns a serializer instance.
+        serializer = ActionReportSerializer(data = self.request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            blog_id = data.get('id_')
+            action = data.get('action')
+            group = data.get('group_id')
+            vs = Group.objects.filter(id = group)
+            if not vs.exists():
+                return Response({}, status = status.HTTP_404_NOT_FOUND)
+            vd = vs.first()
+            queryset = self.get_queryset()
+            qs = queryset.filter(id = blog_id)
+            if not qs.exists():
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            obj = qs.first()
+            if action == "report":
+                obj.likes.add(self.request.user)
+                serializer = BlogSerializer(obj)
+                #print(serializer.data)
+                return Response(serializer.data)
 
 class BlogActionView(generics.CreateAPIView):
     """
