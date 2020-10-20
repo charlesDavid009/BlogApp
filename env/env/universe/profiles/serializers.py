@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Profile, Follow
+from .models import Profile, Follow, profiles_followed
 from django.conf import settings
 
 
@@ -62,4 +62,11 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
+        fields = '__all__'
+
+
+class MyFollowingsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = profiles_followed
         fields = '__all__'

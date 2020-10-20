@@ -79,30 +79,27 @@ class UserFollowersView(generics.ListAPIView):
     """
     DIsplays Followers
     """
-    lookup                     = 'pk'
+    lookup                     = 'id'
     serializer_class           = FollowSerializer
     permission_classes         = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.kwargs.get('pk')
-        obj = Profile.objects.filter(user__id = user)
-        obj = obj.first()
-        qs = Follow.objects.filter(profiles = obj).order_by('alphabet')
+        user = self.kwargs.get('id')
+        qs = Follow.objects.filter(profiles = user)
         return qs
 
 class UsersFollowingView(generics.ListAPIView):
     """
     Displays Users is Following
     """
-    lookup                     = 'pk'
-    serializers_class          = FollowSerializer
+    lookup                     = 'id'
+    serializer_class           = FollowSerializer
     permission_classes         = [IsAuthenticated]
 
     def get_queryset(self):
-        users = self.kwargs.get('pk')
-        obj = Profile.objects.filter(user__id = users)
-        qs = Profile.objects.following_feed(obj)
-        return qs
+        users = self.kwargs.get('id')
+        obj = Follow.objects.filter(users__id = users)
+        return obj
 
 class ProfileActionView(generics.CreateAPIView):
     """

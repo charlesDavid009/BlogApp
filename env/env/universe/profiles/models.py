@@ -43,6 +43,7 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
     followers = models.ManyToManyField(USER, related_name='my_followings', blank=True, through="Follow")
+    Myfollows = models.ManyToManyField(USER, related_name='profile_follows', blank=True, through="profiles_followed")
 
     objects = ProfileManager()
 
@@ -58,3 +59,7 @@ class Follow(models.Model):
     profiles = models.ForeignKey(Profile, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class profiles_followed(models.Model):
+    users = models.ForeignKey(USER, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
