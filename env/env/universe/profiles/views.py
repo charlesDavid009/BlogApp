@@ -42,13 +42,13 @@ class UpdateProfileView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes          = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Profile.objects.all()
+        qs = Profile.objects.all()
+        return qs
 
 class MyProfileView(generics.ListAPIView):
     """
     Gets Users Profile
     """
-    Lookup                      = 'pk'
     serializer_class            = ProfileSerializer
     permission_classes          = [IsAuthenticated]
 
@@ -61,23 +61,17 @@ class GetUserView(generics.ListAPIView):
     """
     Search And Displays Profiles According to User Id Provided
     """
-    Lookup                      = 'slug'
     serializer_class            = ProfileSerializer
     permission_classes          = [IsAuthenticated]
 
     def get_queryset(self):
-        query = self.request.GET.get("q")
-        if query is not None:
-            qs = Profile.objects.all()
-            qs = qs.filter(
-                Q(user__username__icontains = query)|
-                Q(first_name__icontains = query)).distinct()
+        qs = Profile.objects.all()
         return qs
 
 
-class UserFollowersView(generics.ListAPIView):
+class UsersFollowersView(generics.ListAPIView):
     """
-    DIsplays Followers
+    DIsplays User Followers
     """
     lookup                     = 'id'
     serializer_class           = FollowSerializer
@@ -88,9 +82,9 @@ class UserFollowersView(generics.ListAPIView):
         qs = Follow.objects.filter(profiles = user)
         return qs
 
-class UsersFollowingView(generics.ListAPIView):
+class UserFollowingView(generics.ListAPIView):
     """
-    Displays Users is Following
+    Displays Users Followings
     """
     lookup                     = 'id'
     serializer_class           = FollowSerializer
@@ -115,23 +109,20 @@ class ProfileActionView(generics.CreateAPIView):
         if serializer.is_valid():
             data = serializer.validated_data
             profile = data.get("id")
+            action = data.get("action")
             qs = self.queryset.filter(user__id = profile)
             if not qs.exists():
                 return Response({}, status=status.HTTP_404_NOT_FOUND)
             obj = qs.first()
-            if me == obj.user:
-                vs = obj.user
-                qs = vs.my_followings.all()
-                serializer = FollowSerializer(qs)
-                return Response(serializer.data)
-            action = data.get("action")
-            if action == "follow":
-                obj.followers.add(me)
-                serializer = ProfileSerializer(obj)
-                return Response(serializer.data)
-            elif action == "unfollow":
-                obj.followers.remove(me)
-                serializer = ProfileSerializer(obj)
-                return Response(serializer.data)
-            else:
-                pass
+            if me != obj.user:
+                if action == "follow":
+                    obj.followers.add(me)
+                    serializer = ProfileSerializer(obj)
+                    return Response(serializer.data)
+                elif action == "unfollow":
+                    obj.followers.remove(me)
+                    serializer = ProfileSerializer(obj)
+                    return Response(serializer.data)
+            serializer = ProfileSerializer(obj)
+            return Response(serializer.data)
+

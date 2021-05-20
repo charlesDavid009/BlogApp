@@ -20,4 +20,4 @@ class IsOwners(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         not_owner = Profile.objects.filter(user= user)
-        return not not_owner
+        return not_owner

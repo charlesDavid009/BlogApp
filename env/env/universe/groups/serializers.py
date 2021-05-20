@@ -32,10 +32,10 @@ class GroupSerializer(serializers.ModelSerializer):
     def get_users(self, obj):
         return obj.users.count()
 
-class CreateGroupSerializer(serializers.Serializer):
-    group_name = serializers.CharField(max_length=100)
-    description = serializers.CharField(required=False)
-    picture = serializers.ImageField(required=False)
+class CreateGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['group_name', 'description', 'picture']
 
     def create(self, validated_data):
         return Group.objects.create(**validated_data)
@@ -51,21 +51,13 @@ class CreateGroupSerializer(serializers.Serializer):
 
 
 class CreateBlogSerializer(serializers.Serializer):
-    reference_id = serializers.IntegerField()
-    title = serializers.CharField(max_length=200)
-    content = serializers.CharField()
-    picture = serializers.ImageField(required=False)
+    class Meta:
+        ref_name = "group 4"
+        model = MyBlog
+        fields = ['reference_id', 'title', 'content', 'picture']
 
     def create(self, validated_data):
         return MyBlog.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.title = validated_data.get('title', instance.title)
-        instance.picture = validated_data.get('picture', instance.picture)
-        instance.content = validated_data.get('content', instance.content)
-        instance.save()
-        return instance
-
 
 class BlogSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField(read_only=True)
@@ -73,6 +65,7 @@ class BlogSerializer(serializers.ModelSerializer):
     parent = CreateBlogSerializer(read_only=True)
 
     class Meta:
+        ref_name = "group 4"
         model = MyBlog
         exclude = ['report']
 
@@ -118,10 +111,10 @@ class CreateMessageSerializer(serializers.Serializer):
         return Message.objects.create(**validated_data)
 
 
-class ActionBlogSerializer(serializers.Serializer):
+class ActionGroupSerializer(serializers.Serializer):
     id_ = serializers.IntegerField()
     action = serializers.CharField()
-    title = serializers.CharField(required=False)
+    title = serializers.CharField()
     add = serializers.CharField(required=False)
     group_id = serializers.IntegerField(required = False)
 
@@ -131,6 +124,10 @@ class ActionBlogSerializer(serializers.Serializer):
             return value
         return serializers.ValidationError(status=400)
 
+
+class GroupActionBlogSerializer(ActionGroupSerializer):
+    class Meta:
+        ref_name = 'group 3'
 class ActionReportSerializer(serializers.Serializer):
     id_ = serializers.IntegerField()
     action = serializers.CharField()
@@ -146,6 +143,7 @@ class CommentSerializer(serializers.ModelSerializer):
     like = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
+        ref_name = "group 4"
         model = MyComment
         fields = ["reference", "id", "comment", "likes", "created_at"]
 
@@ -154,8 +152,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CreateCommentSerializer(serializers.Serializer):
-    reference = serializers.IntegerField()
-    comment = serializers.CharField()
+    class Meta:
+        ref_name = "group 4"
+        model = MyComment
+        fields ="__all__"
 
     def create(self, validated_data):
         return MyComment.objects.create(**validated_data)
@@ -211,7 +211,10 @@ class ReportSerializer(serializers.ModelSerializer):
     def get_comment(self, obj):
         return obj.comment.count()
 
-
+class CreateReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reports
+        fields = ["reasons"]
 
 class ReportListSerializer(serializers.ModelSerializer):
 

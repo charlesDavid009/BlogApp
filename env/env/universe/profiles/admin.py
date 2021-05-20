@@ -13,7 +13,7 @@ class FollowProfileAdmin(admin.TabularInline):
 
 class ProfileAdmin(admin.ModelAdmin):
     inlines = [FollowProfileAdmin]
-    list_display = ['user', 'first_name', 'last_name', 'email',  'nationality']
+    list_display = ['user', 'first_name', 'last_name', 'nationality']
 
     search_feild = ['user']
 

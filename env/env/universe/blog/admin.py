@@ -18,9 +18,9 @@ class SubCommentLikesAdmin(admin.TabularInline):
 
 class SubCommentAdmin(admin.ModelAdmin):
     inlines = [SubCommentLikesAdmin]
-    list_display = ['text', 'blog', 'user',  'user_info']
+    list_display = ['text', 'comment', 'user',  'user_info']
 
-    search_feild = ['blog']
+    search_feild = ['comment']
 
     class Meta:
         model = SubComment
@@ -50,7 +50,7 @@ class BlogLikesAdmin(admin.TabularInline):
 
 class BlogAdmin(admin.ModelAdmin):
     inlines = [BlogLikesAdmin]
-    list_display = ['title', 'created', 'user',  'owner']
+    list_display = ['title', 'created', 'user']
 
     search_feild = ['title']
 

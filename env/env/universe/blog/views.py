@@ -61,7 +61,31 @@ class BlogCreatePostView(generics.CreateAPIView):
         return Blog.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user = self.request.user)
+        users = self.request.user
+        serializer.save(user= users)
+
+class BlogDraftRUDView(generics.RetrieveUpdateDestroyAPIView):
+    lookup                  = 'pk'
+    serializer_class        = BlogSerializer
+    permission_classes      = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        return Blog.drafts.all()
+
+
+class BlogDraftListView(generics.ListAPIView):
+    """
+    Get All Drafts
+    """
+    lookup                   = 'pk'
+    serializer_class         = BlogSerializer
+    permission_classes       = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        qs = Blog.drafts.all()
+        user  = self.request.user
+        obj = qs.filter(user= user)
+        return obj
 
 
 class BlogPostListView(generics.ListAPIView):
@@ -80,9 +104,8 @@ class BlogPostListView(generics.ListAPIView):
         qs = Blog.objects.all()
         query = self.request.GET.get("q")
         if query is not None:
-            qs = qs.filter(
-                Q(title__icontains = query)|
-                Q(content__icontains = query)).distinct()
+            search = Blog.objects.search(query=query)
+            return search
         return qs
 
 class BlogUsersPostsView(generics.ListAPIView):
@@ -139,10 +162,11 @@ class BlogActionView(generics.CreateAPIView):
             blog_id = data.get('id')
             action = data.get('action')
             details = data.get('add')
+            stat = data.get('status')
             queryset = self.get_queryset()
             qs = queryset.filter(id = blog_id)
             if not qs.exists():
-                return Response({}, status=staus.HTTP_404_NOT_FOUND)
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
             obj = qs.first()
             if action == "like":
                 obj.likes.add(self.request.user)
@@ -161,7 +185,8 @@ class BlogActionView(generics.CreateAPIView):
                 new_blog = Blog.objects.create(
                     user=request.user,
                     parent=obj,
-                    content=details
+                    content=details,
+                    status= stat
                 )
                 serializer = BlogSerializer(new_blog)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -229,7 +254,8 @@ class CommentCreatePostView(generics.CreateAPIView):
         return Comment.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        users=self.request.user
+        serializer.save(user=users)
 
 
 class CommentPostListView(generics.ListAPIView):
@@ -314,6 +340,7 @@ class SubCommentCreatePostView(generics.CreateAPIView):
     """
     Create A SubComment
     """
+    #queryset = Comment.objects.all()
     lookup = 'pk'
     serializer_class = CreateSubCommentSerializer
     permission_classes = [IsAuthenticated]
@@ -322,7 +349,28 @@ class SubCommentCreatePostView(generics.CreateAPIView):
         return SubComment.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        users=self.request.user
+        serializer.save(user=users)
+        """serializer = CreateSubCommentSerializer(data=self.request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            comment_id = data.get('comment_id')
+            text = data.get('text')
+            queryset = Comment.objects.all()
+            qs = queryset.filter(id=comment_id)
+            if not qs.exists():
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            obj = qs.first()
+            obj_id =obj.blog
+            new_comment = SubComment.objects.create(
+                blog = obj_id,
+                user = users,
+                comment = str(qs),
+                text = text
+            )
+            serializer = SubCommentSerializer(new_comment)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)"""
 
 
 class SubCommentPostListView(generics.ListAPIView):
@@ -339,7 +387,7 @@ class SubCommentPostListView(generics.ListAPIView):
         in the browser--> ?q=(the word you want to search for)
         """
         blog_id = self.kwargs.get('pk')
-        qs = SubComment.objects.filter(blog=blog_id)
+        qs = SubComment.objects.filter(comment=blog_id)
         return qs
 
 
@@ -353,7 +401,7 @@ class SubCommentLikeListView(generics.ListAPIView):
 
     def get_queryset(self):
         blog_id = self.kwargs.get('id')
-        qs = SubCommentLikes.objects.filter(blog=blog_id)
+        qs = SubCommentLikes.objects.filter(comment=blog_id)
         return qs
 
 
