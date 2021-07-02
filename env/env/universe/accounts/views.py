@@ -95,7 +95,7 @@ class NewVerifyTokenPostView(views.APIView):
             absolute = 'http://'+current_site+requestlink
 
             email_body = 'WELCOME TO BLOGHUB \n\n'"Hi, you requested for a new activation link," + \
-                "  please disregard this mail,"+  " if you didn't make this request" + \
+                "  please disregard this mail,"+   " if you didn't make this request" + \
                 '\n\n Use the link below to verify your email and activate your account \n' + absurl+ \
                 ' \n Click on the link below to request for a new activation link \n' + absolute
             data = {'email_body': email_body, 'to_email': user.email,

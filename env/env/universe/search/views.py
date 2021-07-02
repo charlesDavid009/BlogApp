@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from itertools import chain
-from rest_framework import generics
+from rest_framework import generics, views
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import SearchSerializer
@@ -8,22 +8,19 @@ from pages.models import Page, Blogs
 from blog.models import Blog
 from groups.models import Group, MyBlog
 from profiles.models import Profile
+from django.views.generic import ListView
+class SearchView(ListView):
 
-class SearchView(generics.ListAPIView):
-    serializer_class         = SearchSerializer
     permission_classes       = [IsAuthenticated]
 
-    #def get_context_data(self, *args, **kwargs):
-        #context = super().get_context_data(*args, **kwargs)
-        #context['count'] = self.count or 0
-        #context['query'] = self.request.GET.get('q')
-        #return context
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['count'] = self.count or 0
+        context['query'] = self.request.GET.get('q')
+        return context
 
     def get_queryset(self):
-        serializer = SearchSerializer(data = self.request.data)
-        if serializer.is_valid():
-            data = serializer.validated_data
-            query = data.get('query')
+        query = self.request.GET.get('q')
 
         if query is not None:
             blog_results        = Blog.objects.search(query)
@@ -32,6 +29,7 @@ class SearchView(generics.ListAPIView):
             groups_results      = Group.objects.search(query)
             groups_blog_results = MyBlog.objects.search(query)
             profile_results     = Profile.objects.search(query)
+
 
             # combine querysets
             queryset_chain = chain(
@@ -50,11 +48,11 @@ class SearchView(generics.ListAPIView):
         return Blog.objects.none() # just an empty queryset as default
 
 
-class HomeView(generics.ListAPIView):
-    serializer_class         = SearchSerializer
+class HomeView(ListView):
     permission_classes       = [IsAuthenticated]
 
-    def get_queryset(self):
+    def queryset(self):
+        mylists = []
         blog_results        = Blog.objects.all()
         page_results      = Page.objects.all()
         pages_blog_results = Blogs.objects.all()
@@ -75,5 +73,6 @@ class HomeView(generics.ListAPIView):
                     key=lambda instance: instance.pk,
                     reverse=True)
         self.count = len(qs) # since qs is actually a list
-        return qs
+        mylists.append(qs)
+        return mylists
 
