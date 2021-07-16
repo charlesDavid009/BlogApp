@@ -105,7 +105,7 @@ class Profile(models.Model):
     replies = models.ManyToManyField(USER, related_name='replies_counts', blank=True, through="Comment_Lists")
     followers = models.ManyToManyField(USER, related_name='my_followings', blank=True,  through="Follow")
     following = models.ManyToManyField(USER, related_name='profile_follows', blank=True, through="profiles_followed")
-*
+
 
     objects = ProfileManager()
 
