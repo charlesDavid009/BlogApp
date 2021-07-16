@@ -10,7 +10,7 @@ from markdown_deux import markdown
 from django.conf import settings
 from groups.models import Group, MyBlog, Message
 from pages.models import Page
-
+from multiselectfield import MultiSelectField
 # Create your models here.
 
 USER = settings.AUTH_USER_MODEL
@@ -94,9 +94,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True)
     picture = models.ImageField(blank=True, null=True)
     dob = models.IntegerField(blank=True, null=True)
-    interest = ArrayField(
-        models.CharField( blank=True, null = True, max_length= 1000, choices=interests, default = 'All'),
-        )
+    interest = MultiSelectField(choices = interests)
     contact = models.IntegerField(blank=True, null=True)
     nationality = models.CharField(max_length=250, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
