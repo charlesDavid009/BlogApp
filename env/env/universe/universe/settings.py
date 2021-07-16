@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     # Installed APPs
     'accounts',
     'blog',
+    'comment',
     'groups',
     'news',
     'pages',

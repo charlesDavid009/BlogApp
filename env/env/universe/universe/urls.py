@@ -38,6 +38,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
     path('', include('blog.urls')),
+    path('', include('comment.urls')),
     path('', include('groups.urls')),
     path('', include('profiles.urls')),
     path('', include('pages.urls')),
