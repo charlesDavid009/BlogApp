@@ -42,7 +42,7 @@ class MyCommentCreateAPIViews(generics.CreateAPIView):
                 model_type=model_type, 
                 slug=slug,
                 parent_id=parent_id,
-                users=self.request.user
+                user=self.request.user
                 )
 
 class MyCommentDetailAPIViews(generics.RetrieveDestroyAPIView):
