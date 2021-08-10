@@ -21,7 +21,7 @@ class IsOwners(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         not_owner = Group.objects.filter(owner= user)
-        return not not_owner
+        return not_owner
 
 class IsFollower(permissions.BasePermission):
     """

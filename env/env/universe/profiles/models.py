@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
@@ -9,7 +10,7 @@ from markdown_deux import markdown
 from django.conf import settings
 from groups.models import Group, MyBlog, Message
 from pages.models import Page
-
+from multiselectfield import MultiSelectField
 # Create your models here.
 
 USER = settings.AUTH_USER_MODEL
@@ -48,6 +49,44 @@ class Profile(models.Model):
     """
     This is the models for USER PROFILES
     """
+    interests =(
+        ('All', 'All'),
+        ('Technology', 'Tech'),
+        ('Arts', 'Arts'),
+        ('Fashion', 'Fashion'),
+        ('Design', 'Design'),
+        ('Politics', 'Politics'),
+        ('Music', 'Music'),
+        ('Drama', 'Drama'),
+        ('Social', 'Social'),
+        ('Meditation', 'Meditation'),
+        ('Adventure', 'Adventure'),
+        ('Comics', 'Comics'),
+        ('Anime', 'Anime'),
+        ('Novels', 'Novels'),
+        ('Movie', 'Movie'),
+        ('Religion', 'Religion'),
+        ('Education', 'Education'),
+        ('Transportation', 'Transportation'),
+        ('Books', 'Books'),
+        ('Science', 'Science'),
+        ('Food', 'Food'),
+        ('Nutrition', 'Nutrition'),
+        ('Travel and Tour', 'Travel and Tour'),
+        ('Space', 'Space'),
+        ('Animals', 'Animals'),
+        ('History', 'History'),
+        ('Crypto_currency', 'Crypto_currency'),
+        ('Health', 'Health'),
+        ('INnovation', 'Innovation'),
+        ('Crime', 'Crime'),
+        ('Justice', 'Justice'),
+        ('Comedy', 'Comedy'),
+        ('Business', 'Business'),
+        ('Fitness', 'Fitness'),
+        ('Security', 'Security')
+        )
+
     user = models.OneToOneField(USER, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100, blank=True, null=True)
@@ -55,6 +94,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True)
     picture = models.ImageField(blank=True, null=True)
     dob = models.IntegerField(blank=True, null=True)
+    interest = MultiSelectField(choices = interests)
     contact = models.IntegerField(blank=True, null=True)
     nationality = models.CharField(max_length=250, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -65,6 +105,7 @@ class Profile(models.Model):
     replies = models.ManyToManyField(USER, related_name='replies_counts', blank=True, through="Comment_Lists")
     followers = models.ManyToManyField(USER, related_name='my_followings', blank=True,  through="Follow")
     following = models.ManyToManyField(USER, related_name='profile_follows', blank=True, through="profiles_followed")
+
 
     objects = ProfileManager()
 

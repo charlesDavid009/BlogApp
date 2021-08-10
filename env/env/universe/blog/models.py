@@ -124,7 +124,6 @@ class BlogLikes(models.Model):
     def user_info(self):
         return self.user
 
-
 class Comment(models.Model):
     """
     MODELS FOR COMMENTS 
